@@ -1,5 +1,9 @@
 #!/bin/bash
 
+
+# delete outdate deployemnt dir
+rm -fr dist dist.zip
+
 # Create the dist directory if it doesn't exist
 mkdir -p dist
 
@@ -15,7 +19,7 @@ cp download.html index.html 404.html dist/
 # Copy prod files
 cp sitemap.xml robots.txt .htaccess dist/
 
-# then zip the deployemnt dir
+# then zip the deployement dir
 zip -r dist.zip dist/
 
 echo "All files copied successfully to the dist/ directory."
