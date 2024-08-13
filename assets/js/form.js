@@ -12,22 +12,25 @@ formHTML.addEventListener('submit', function (event) {
         const email = formData.get('email');
         const urlParams = new URLSearchParams(window.location.search);
         const name = urlParams.get('platform') || 'unknown';
-        const message = "Under construction notification";
+        const message = "English: Under construction notification";
+        const headers = new Headers();
+        headers.append("Content-Type", "application/json");
+        const body = JSON.stringify({
+            name,
+            email,
+            message,
+        });
 
-        fetch("https://byteestudio.com/api/send-contact-info", {
-            "headers": {
-                "accept": "*/*",
-                "content-type": "application/json",
-            },
-            "referrer": "https://www.flexiipay.com",
-            "body": JSON.stringify({ email, name, message }),
-            "method": "POST",
-            "mode": "no-cors",
-        })
+        const opts = {
+            method: "POST", headers,
+            body,
+            redirect: "follow"
+        };
+        fetch("https://byteestudio.com/api/send-contact-info", opts)
             .then(response => {
-                
+
                 if (response.status > 399 && response.status != 429) {
-                    throw new Error( response.statusText +  ' Try again later.');
+                    throw new Error(response.statusText + ' Try again later.');
                 }
 
                 return response.text()
