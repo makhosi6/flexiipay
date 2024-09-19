@@ -1,0 +1,41 @@
+name: Deploy to GitHub Pages on PR to Main
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3
+
+      - name: Clone FR branch
+        run: |
+          git clone --branch fr https://github.com/makhosi6/flexiipay.git /tmp/fr-branch
+          rm -rf /tmp/fr-branch/.git
+
+      - name: Clone EN branch
+        run: |
+          git clone --branch en https://github.com/makhosi6/flexiipay.git /tmp/en-branch
+          rm -rf /tmp/en-branch/.git
+
+      - name: Prepare deploy folder
+        run: |
+          mkdir -p /tmp/deploy/fr /tmp/deploy/en
+          cp -R /tmp/en-branch/* /tmp/deploy/
+          cp -R /tmp/fr-branch/* /tmp/deploy/fr/
+          cp -R /tmp/en-branch/* /tmp/deploy/en/
+
+      - name: Deploy to gh-pages branch
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          cd /tmp/deploy
+          git init
+          git add .
+          git commit -m "Deploy PR #${{ github.event.number }} to GitHub Pages"
+          git push --force https://${{ secrets.GITHUB_TOKEN }}@github.com/your-username/your-repo.git master:gh-pages
