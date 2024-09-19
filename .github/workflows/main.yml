@@ -30,6 +30,18 @@ jobs:
           cp -R /tmp/fr-branch/* /tmp/deploy/fr/
           cp -R /tmp/en-branch/* /tmp/deploy/en/
 
+      - name: Wipe gh-pages branch
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git clone --branch gh-pages https://github.com/makhosi6/flexiipay.git /tmp/gh-pages
+          cd /tmp/gh-pages
+          rm -rf *
+          git add .
+          git commit -m "Clean gh-pages branch before deployment"
+          git push --force https://${{ secrets.GITHUB_TOKEN }}@github.com/makhosi6/flexiipay.git gh-pages
+
+
       - name: Deploy to gh-pages branch
         run: |
           git config --global user.name "github-actions[bot]"
@@ -38,4 +50,4 @@ jobs:
           git init
           git add .
           git commit -m "Deploy PR #${{ github.event.number }} to GitHub Pages"
-          git push --force https://${{ secrets.GITHUB_TOKEN }}@github.com/your-username/your-repo.git master:gh-pages
+          git push --force https://${{ secrets.GITHUB_TOKEN }}@github.com/makhosi6/flexiipay.git master:gh-pages
