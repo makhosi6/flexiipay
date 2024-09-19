@@ -55,34 +55,49 @@ jobs:
           chmod +x build.sh
           ./build.sh
 
+      # Run build.sh in the root of the project
+      - name: Build root
+        run: |
+          chmod +x build.sh
+          ./build.sh
 
       # Prepare deploy folder by copying the built content
       - name: Copy build outputs to deploy folder
         run: |
-          mkdir -p /tmp/deploy/fr /tmp/deploy/en
+          mkdir -p /tmp/deploy /tmp/deploy/fr /tmp/deploy/en
           cp -R /tmp/deploy/fr-branch/dist/* /tmp/deploy/fr/
           cp -R /tmp/deploy/en-branch/dist/* /tmp/deploy/en/
           cp -R /tmp/deploy/en-branch/dist/* /tmp/deploy/
 
+      # Set up git user for wiping gh-pages branch
+      - name: Set up Git user
+        uses: fregante/setup-git-user@v2
+        with:
+          name: ${{ secrets.GIT_USER_NAME }}
+          email: ${{ secrets.GIT_USER_EMAIL }}
+
       # Wipe gh-pages branch
       - name: Wipe gh-pages branch
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git clone --branch gh-pages https://github.com/makhosi6/flexiipay.git /tmp/gh-pages
           cd /tmp/gh-pages
           rm -rf *
           git add .
           git commit -m "Clean gh-pages branch before deployment"
-          git push --force https://github.com/makhosi6/flexiipay.git gh-pages
+          git push --force https://${{ secrets.GITHUB_TOKEN }}@github.com/makhosi6/flexiipay.git gh-pages
+
+      # Set up git user for deploying to gh-pages branch
+      - name: Set up Git user
+        uses: fregante/setup-git-user@v2
+        with:
+          name: ${{ secrets.GIT_USER_NAME }}
+          email: ${{ secrets.GIT_USER_EMAIL }}
 
       # Deploy to gh-pages branch
       - name: Deploy to gh-pages branch
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
           cd /tmp/deploy
           git init
           git add .
           git commit -m "Deploy PR #${{ github.event.number }} to GitHub Pages"
-          git push --force https://github.com/makhosi6/flexiipay.git gh-pages
+          git push --force https://${{ secrets.GITHUB_TOKEN }}@github.com/makhosi6/flexiipay.git gh-pages
