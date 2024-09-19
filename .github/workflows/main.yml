@@ -5,8 +5,8 @@ on:
     branches:
       - main
   push:
-    branches: ["main"]
-
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
@@ -29,23 +29,42 @@ jobs:
       - name: Checkout the repository
         uses: actions/checkout@v3
 
+      # Clone FR branch into /tmp/deploy/fr-branch
       - name: Clone FR branch
         run: |
-          git clone --branch fr https://github.com/makhosi6/flexiipay.git /tmp/fr-branch
-          rm -rf /tmp/fr-branch/.git
+          git clone --branch fr https://github.com/makhosi6/flexiipay.git /tmp/deploy/fr-branch
+          rm -rf /tmp/deploy/fr-branch/.git
 
+      # Clone EN branch into /tmp/deploy/en-branch
       - name: Clone EN branch
         run: |
-          git clone --branch en https://github.com/makhosi6/flexiipay.git /tmp/en-branch
-          rm -rf /tmp/en-branch/.git
+          git clone --branch en https://github.com/makhosi6/flexiipay.git /tmp/deploy/en-branch
+          rm -rf /tmp/deploy/en-branch/.git
 
-      - name: Prepare deploy folder
+      # Run build.sh in the FR branch
+      - name: Build FR branch
+        run: |
+          cd /tmp/deploy/fr-branch
+          chmod +x build.sh
+          ./build.sh
+
+      # Run build.sh in the EN branch
+      - name: Build EN branch
+        run: |
+          cd /tmp/deploy/en-branch
+          chmod +x build.sh
+          ./build.sh
+
+
+      # Prepare deploy folder by copying the built content
+      - name: Copy build outputs to deploy folder
         run: |
           mkdir -p /tmp/deploy/fr /tmp/deploy/en
-          cp -R /tmp/en-branch/* /tmp/deploy/
-          cp -R /tmp/fr-branch/* /tmp/deploy/fr/
-          cp -R /tmp/en-branch/* /tmp/deploy/en/
+          cp -R /tmp/deploy/fr-branch/dist/* /tmp/deploy/fr/
+          cp -R /tmp/deploy/en-branch/dist/* /tmp/deploy/en/
+          cp -R /tmp/deploy/en-branch/dist/* /tmp/deploy/
 
+      # Wipe gh-pages branch
       - name: Wipe gh-pages branch
         run: |
           git config --global user.name "github-actions[bot]"
@@ -57,7 +76,7 @@ jobs:
           git commit -m "Clean gh-pages branch before deployment"
           git push --force https://${{ secrets.GITHUB_TOKEN }}@github.com/makhosi6/flexiipay.git gh-pages
 
-
+      # Deploy to gh-pages branch
       - name: Deploy to gh-pages branch
         run: |
           git config --global user.name "github-actions[bot]"
@@ -66,4 +85,4 @@ jobs:
           git init
           git add .
           git commit -m "Deploy PR #${{ github.event.number }} to GitHub Pages"
-          git push --force https://${{ secrets.GITHUB_TOKEN }}@github.com/makhosi6/flexiipay.git master:gh-pages
+          git push --force https://${{ secrets.GITHUB_TOKEN }}@github.com/makhosi6/flexiipay.git gh-pages
