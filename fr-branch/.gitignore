@@ -1,0 +1,7 @@
+node_modules
+.jshintrc
+.DS_Store
+.jsbeautifyrc
+
+dist
+dist.*

@@ -1,0 +1,16 @@
+# Enable the Rewrite Engine
+RewriteEngine On
+
+
+ErrorDocument 404 /404.html
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /404.html [L]
+
+DirectoryIndex index.html
+
+AddType image/x-icon .ico
+AddType image/png .png
+AddType text/css .css
+AddType application/javascript .js
