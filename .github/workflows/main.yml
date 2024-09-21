@@ -95,7 +95,7 @@ jobs:
           rm -rf *
           git add .
           git commit -m "Clean gh-pages branch before deployment"
-          git push --force https://${{ secrets.GITHUB_TOKEN }}@github.com/makhosi6/flexiipay.git gh-pages
+          git push --force https://${{ secrets.GIT_USER_ACCESS_TOKEN }}@github.com/makhosi6/flexiipay.git gh-pages
 
       # Set up git user for deploying to gh-pages branch
       - name: Set up Git user
@@ -113,4 +113,4 @@ jobs:
           git init
           git add .
           git commit -m "Deploy PR #${{ github.event.number }} to GitHub Pages"
-          git push --force https://${{ secrets.GITHUB_TOKEN }}@github.com/makhosi6/flexiipay.git gh-pages
+          git push --force https://${{ secrets.GIT_USER_ACCESS_TOKEN }}@github.com/makhosi6/flexiipay.git gh-pages
