@@ -114,6 +114,6 @@ jobs:
           git remote add origin https://github.com/makhosi6/flexiipay.git
           git fetch origin gh-pages
           git checkout gh-pages || git checkout -b gh-pages
-          git add .
+          git add . -- :!fr-branch :!en-branch
           git commit -m "Deploy PR #${{ github.event.number }} to GitHub Pages"
           git push --force https://${{ secrets.GIT_USER_ACCESS_TOKEN }}@github.com/makhosi6/flexiipay.git gh-pages
