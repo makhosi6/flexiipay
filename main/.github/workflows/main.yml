@@ -1,0 +1,132 @@
+name: Deploy to GitHub Pages on PR to Main
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+  checks: write
+  deployments: write
+  issues: write
+  packages: write
+  pull-requests: write
+  repository-projects: write
+  security-events: write
+  statuses: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3
+
+      # Clone FR branch into /tmp/deploy/fr-branch
+      - name: Clone FR branch
+        run: |
+          git clone --branch fr https://github.com/makhosi6/flexiipay.git /tmp/deploy/fr-branch
+          rm -rf /tmp/deploy/fr-branch/.git
+
+      # Clone EN branch into /tmp/deploy/en-branch
+      - name: Clone EN branch
+        run: |
+          git clone --branch en https://github.com/makhosi6/flexiipay.git /tmp/deploy/en-branch
+          rm -rf /tmp/deploy/en-branch/.git
+
+      # Clone 'main' branch into /tmp/deploy/main
+      - name: Clone main branch
+        run: |
+          git clone --branch main https://github.com/makhosi6/flexiipay.git /tmp/deploy/main
+          rm -rf /tmp/deploy/main/.git
+
+      # Run build.sh in the FR branch
+      - name: Build FR branch
+        run: |
+          cd /tmp/deploy/fr-branch
+          chmod +x build.sh
+          ./build.sh
+
+      # Run build.sh in the EN branch
+      - name: Build EN branch
+        run: |
+          cd /tmp/deploy/en-branch
+          chmod +x build.sh
+          ./build.sh
+
+      # Run build.sh in the EN branch
+      - name: Build main branch
+        run: |
+          cd /tmp/deploy/main
+          chmod +x build.sh
+          ./build.sh
+
+      # Run build.sh in the root of the project
+      - name: Build root
+        run: |
+          chmod +x build.sh
+          ./build.sh
+
+      # Prepare deploy folder by copying the built content
+      - name: Copy build outputs to deploy folder
+        run: |
+          mkdir -p /tmp/deploy /tmp/deploy/fr /tmp/deploy/en /tmp/deploy/main
+          cp -R /tmp/deploy/fr-branch/dist/* /tmp/deploy/fr/
+          cp -R /tmp/deploy/en-branch/dist/* /tmp/deploy/en/
+          cp -R /tmp/deploy/main/dist/* /tmp/deploy/
+
+      # Set up git user for wiping gh-pages branch
+      - name: Set up Git user
+        uses: fregante/setup-git-user@v2
+        with:
+          name: ${{ secrets.GIT_USER_NAME }}
+          email: ${{ secrets.GIT_USER_EMAIL }}
+
+      # Wipe gh-pages branch
+      - name: Wipe gh-pages branch
+        run: |
+          git config --global user.name "makhosi6"
+          git config --global user.email "ndondo330@gmail.com"
+          git clone --branch gh-pages https://github.com/makhosi6/flexiipay.git /tmp/gh-pages
+          cd /tmp/gh-pages
+          rm -rf *
+          git add .
+          git commit -m "Clean gh-pages branch before deployment"
+          git push --force https://${{ secrets.GIT_USER_ACCESS_TOKEN }}@github.com/makhosi6/flexiipay.git gh-pages
+
+      # Set up git user for deploying to gh-pages branch
+      - name: Set up Git user
+        uses: fregante/setup-git-user@v2
+        with:
+          name: ${{ secrets.GIT_USER_NAME }}
+          email: ${{ secrets.GIT_USER_EMAIL }}
+
+      # Deploy to gh-pages branch
+      - name: Deploy to gh-pages branch
+        run: |
+          git config --global user.name "makhosi6"
+          git config --global user.email "ndondo330@gmail.com"
+          cd /tmp/deploy
+          git init
+          git remote add origin https://github.com/makhosi6/flexiipay.git
+          git fetch origin gh-pages
+          git checkout gh-pages || git checkout -b gh-pages
+          git add . -- :!fr-branch :!en-branch
+          git commit -m "Deploy PR #${{ github.event.number }} to GitHub Pages"
+          git push --force https://${{ secrets.GIT_USER_ACCESS_TOKEN }}@github.com/makhosi6/flexiipay.git gh-pages
