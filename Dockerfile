@@ -10,8 +10,14 @@ ENV ROOT_PORT=3035
 # Install git to clone the repo
 RUN apk add --no-cache git
 
+# Remove the default nginx html directory
+RUN rm -rf /usr/share/nginx/html/*
+
 # Clone the repository and check out the gh-pages branch
-RUN git clone --branch gh-pages https://github.com/makhosi6/flexiipay.git /usr/share/nginx/html
+RUN git clone --branch gh-pages https://github.com/makhosi6/flexiipay.git /tmp/flexiipay
+
+# Move the content from the cloned repository to the Nginx html folder
+RUN cp -r /tmp/flexiipay/* /usr/share/nginx/html/
 
 # Create separate server blocks for each path
 COPY ./nginx.conf /etc/nginx/nginx.conf
