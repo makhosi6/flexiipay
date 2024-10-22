@@ -4,6 +4,7 @@ FROM nginx:alpine
 # Set up environment variables
 ENV EN_PORT=3033
 ENV FR_PORT=3034
+ENV MAIN_PORT=3035
 ENV ROOT_PORT=3035
 
 # Install git to clone the repo
@@ -16,6 +17,6 @@ RUN git clone --branch gh-pages https://github.com/makhosi6/flexiipay.git /usr/s
 COPY ./nginx.conf /etc/nginx/nginx.conf
 
 # Expose the required ports
-EXPOSE 3033 3034 3035
+EXPOSE 3033 3034 3035 3036
 
 CMD ["nginx", "-g", "daemon off;"]
