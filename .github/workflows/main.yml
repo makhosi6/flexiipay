@@ -50,6 +50,12 @@ jobs:
           git clone --branch en https://github.com/makhosi6/flexiipay.git /tmp/deploy/en-branch
           rm -rf /tmp/deploy/en-branch/.git
 
+      # Clone 'main' branch into /tmp/deploy/main
+      - name: Clone main branch
+        run: |
+          git clone --branch main https://github.com/makhosi6/flexiipay.git /tmp/deploy/main
+          rm -rf /tmp/deploy/main/.git
+
       # Run build.sh in the FR branch
       - name: Build FR branch
         run: |
@@ -64,6 +70,13 @@ jobs:
           chmod +x build.sh
           ./build.sh
 
+      # Run build.sh in the EN branch
+      - name: Build main branch
+        run: |
+          cd /tmp/deploy/main
+          chmod +x build.sh
+          ./build.sh
+
       # Run build.sh in the root of the project
       - name: Build root
         run: |
@@ -73,10 +86,10 @@ jobs:
       # Prepare deploy folder by copying the built content
       - name: Copy build outputs to deploy folder
         run: |
-          mkdir -p /tmp/deploy /tmp/deploy/fr /tmp/deploy/en
+          mkdir -p /tmp/deploy /tmp/deploy/fr /tmp/deploy/en /tmp/deploy/main
           cp -R /tmp/deploy/fr-branch/dist/* /tmp/deploy/fr/
           cp -R /tmp/deploy/en-branch/dist/* /tmp/deploy/en/
-          cp -R /tmp/deploy/en-branch/dist/* /tmp/deploy/
+          cp -R /tmp/deploy/main/dist/* /tmp/deploy/
 
       # Set up git user for wiping gh-pages branch
       - name: Set up Git user
