@@ -11,5 +11,5 @@ Steps to build and run the Docker container
 2.	Run the Docker container:
   After building the Docker image, run the container using:
 
-  `docker run -d -p 3033:3033 -p 3034:3034 -p 3035:3035 flexiipay:latest`
+  `docker run -d -p 3033:3033 -p 3034:3034 -p 3035:3035 -p 3036:3036 flexiipay:latest`
 
